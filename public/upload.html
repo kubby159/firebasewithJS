@@ -47,6 +47,24 @@
       </div>
     </nav>
 
+    <div class="container mt-3">
+      <input
+        type="text"
+        class="form-control mt-2"
+        id="title"
+        placeholder="title"
+      />
+      <textarea class="form-control mt-2" id="content">content</textarea>
+      <input
+        type="text"
+        class="form-control mt-2"
+        id="price"
+        placeholder="price"
+      />
+      <input class="form-control mt-2" type="file" id="image" />
+      <button class="btn btn-danger mt-3" id="send">올리기</button>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
@@ -78,6 +96,67 @@
     </script>
     <script>
       const db = firebase.firestore();
+      //storage 문법사용.
+      const storage = firebase.storage();
+      //데이터를 저장하는 방법1
+      // db.collection("product").doc("상품3").set({ 상품명: "변기" });
+      //데이터 저정하는 방법2
+      //문서의 파일명은 자동으로 부여됨.
+
+      const title = document.querySelector("#title");
+      const content = document.querySelector("#content");
+      const price = document.querySelector("#price");
+      const onSend = document.querySelector("#send");
+
+      onSend.addEventListener("click", onUpLoad);
+
+      function onUpLoad() {
+        let titleValue = title.value;
+        let contentValue = content.value;
+        let priceValue = price.value;
+        let month = new Date().getMonth();
+        let days = new Date().getDate();
+        let year = new Date().getFullYear();
+
+        //storage에 이미지 저장하는 방법
+        let file = document.querySelector("#image").files[0]; //input에서 선택한 파일을 찾는 법.
+
+        let storageRef = storage.ref();
+        let savePath = storageRef.child("image/" + file.name);
+        let uploadImg = savePath.put(file);
+
+        uploadImg.on(
+          "state_changed",
+          // 변화시 동작하는 함수
+          null,
+          //에러시 동작하는 함수
+          (error) => {
+            console.error("실패사유는", error);
+          },
+          // 성공시 동작하는 함수
+          () => {
+            uploadImg.snapshot.ref.getDownloadURL().then((url) => {
+              console.log("업로드된 경로는", url);
+              let upLoadContent = {
+                상품명: titleValue,
+                내용: contentValue,
+                가격: parseInt(priceValue),
+                날짜: `${year}년 ${month + 1}월 ${days}`,
+                이미지: url,
+              };
+              db.collection("product")
+                .add(upLoadContent)
+                .then((result) => {
+                  console.log(result.id);
+                  // window.location.href = "/index.html";
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            });
+          }
+        );
+      }
     </script>
   </body>
 </html>

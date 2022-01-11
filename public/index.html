@@ -83,17 +83,16 @@
         .get()
         .then((result) => {
           result.forEach((doc) => {
-            const date = new Date();
             const template = `<div class="product">
                               <div
                                 class="thumbnail"
-                                style="background-image: url('https://via.placeholder.com/350')"
+                                style='background-image: url(${
+                                  doc.data().이미지
+                                })'
                               ></div>
                               <div class="flex-grow-1 p-4">
                                 <h5 class="title">${doc.data().상품명}</h5>
-                                <p class="date">${date.getFullYear()}년 ${
-              date.getMonth() + 1
-            }월 ${date.getDate()}일</p>
+                                <p class="date">${doc.data().날짜}일</p>
                                 <p class="price">${doc.data().가격}원</p>
                                 <p class="float-end">?0</p>
                               </div>
